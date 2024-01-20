@@ -54,6 +54,74 @@ class ShoppingServiceTest {
         assertEquals("Purchase successful. Remaining balance: 90.0", result);
         assertEquals(walletBalance - VALID_PRODUCT_PRICE, customer.getWalletBalance());
     }
+    @Test
+    void shouldHandleNegativeProductAmountInCart() {
+        // Given
+        double walletBalance = 100.0;
+        customer.setWalletBalance(walletBalance);
+        customer.getShoppingCart().setProducts(Arrays.asList(VALID_PRODUCT_NAME));
+        OrderPosition negativeAmountOrderPosition = new OrderPosition(1, validProduct, -1);
+
+        when(warehouse.getOrderPositionsList()).thenReturn(Arrays.asList(negativeAmountOrderPosition));
+
+        // When
+        String result = shoppingService.finalizePurchase(customer);
+
+        // Then
+        assertEquals("Purchase failed. Invalid product amount in the shopping cart.", result);
+        assertEquals(walletBalance, customer.getWalletBalance());
+    }
+
+    @Test
+    void shouldHandleZeroProductAmountInCart() {
+        // Given
+        double walletBalance = 100.0;
+        customer.setWalletBalance(walletBalance);
+        customer.getShoppingCart().setProducts(Arrays.asList(VALID_PRODUCT_NAME));
+        OrderPosition zeroAmountOrderPosition = new OrderPosition(1, validProduct, 0);
+
+        when(warehouse.getOrderPositionsList()).thenReturn(Arrays.asList(zeroAmountOrderPosition));
+
+        // When
+        String result = shoppingService.finalizePurchase(customer);
+
+        // Then
+        assertEquals("Purchase failed. Product amount in the shopping cart must be greater than zero.", result);
+        assertEquals(walletBalance, customer.getWalletBalance());
+    }
+
+    @Test
+    void shouldHandleNegativeWalletBalance() {
+        // Given
+        double negativeWalletBalance = -10.0;
+        customer.setWalletBalance(negativeWalletBalance);
+        customer.getShoppingCart().setProducts(Arrays.asList(VALID_PRODUCT_NAME));
+
+        // When
+        String result = shoppingService.finalizePurchase(customer);
+
+        // Then
+        assertEquals("Purchase failed. Invalid wallet balance.", result);
+        assertEquals(negativeWalletBalance, customer.getWalletBalance());
+    }
+
+    @Test
+    void shouldHandleNullWarehouse() {
+        // Given
+        double walletBalance = 100.0;
+        customer.setWalletBalance(walletBalance);
+        customer.getShoppingCart().setProducts(Arrays.asList(VALID_PRODUCT_NAME));
+
+        when(warehouse.getInstance()).thenReturn(null);
+
+        // When
+        String result = shoppingService.finalizePurchase(customer);
+
+        // Then
+        assertEquals("Purchase failed. Warehouse is null.", result);
+        assertEquals(walletBalance, customer.getWalletBalance());
+    }
+
 
 
 }

@@ -30,7 +30,7 @@ public class ShoppingService {
     }
 
     private static Product findProductInStorage(String productName) {
-        return src.main.java.org.example.Warehouse.getInstance().getOrderPositionsList().stream()
+        return org.example.Warehouse.getInstance().getOrderPositionsList().stream()
                 .filter(orderPosition -> orderPosition.getProduct().getName().equalsIgnoreCase(productName))
                 .findFirst()
                 .map(OrderPosition::getProduct)
